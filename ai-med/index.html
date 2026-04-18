@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI-Med 社区 · 医疗 × AI 建设者的聚集地</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Lexend:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-deep: #061210;
+      --bg-panel: #0c1a17;
+      --bg-elevated: #112320;
+      --text: #e8f4f0;
+      --text-muted: #8aa99e;
+      --accent: #3ee0c4;
+      --accent-dim: rgba(62, 224, 196, 0.15);
+      --accent-glow: rgba(62, 224, 196, 0.45);
+      --line: rgba(142, 169, 158, 0.18);
+      --warn-soft: rgba(255, 196, 120, 0.18);
+      --font-display: "Fraunces", Georgia, serif;
+      --font-body: "Lexend", system-ui, sans-serif;
+      --radius: 14px;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: var(--font-body);
+      font-weight: 400;
+      background: var(--bg-deep);
+      color: var(--text);
+      line-height: 1.65;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .bg-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .bg-layer::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background:
+        radial-gradient(ellipse 55% 45% at 15% 20%, rgba(62, 224, 196, 0.12), transparent 55%),
+        radial-gradient(ellipse 40% 35% at 85% 75%, rgba(30, 120, 100, 0.2), transparent 50%),
+        radial-gradient(circle at 50% 100%, rgba(8, 40, 35, 0.9), transparent 45%);
+    }
+
+    .bg-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--line) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(ellipse 80% 70% at 50% 30%, black 20%, transparent 75%);
+      opacity: 0.45;
+    }
+
+    .noise {
+      position: absolute;
+      inset: 0;
+      opacity: 0.04;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 24px 96px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 28px 0 48px;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .logo-mark {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: linear-gradient(145deg, var(--accent) 0%, #1a8a75 100%);
+      display: grid;
+      place-items: center;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--bg-deep);
+      box-shadow: 0 0 32px var(--accent-glow);
+    }
+
+    .logo-text {
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 1.35rem;
+      letter-spacing: -0.02em;
+    }
+
+    .logo-text span {
+      color: var(--accent);
+      font-weight: 400;
+    }
+
+    nav {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    nav a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      padding: 8px 14px;
+      border-radius: 999px;
+      transition: color 0.25s var(--ease), background 0.25s var(--ease);
+    }
+
+    nav a:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 22px;
+      border-radius: 999px;
+      font-family: var(--font-body);
+      font-weight: 500;
+      font-size: 0.9rem;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s var(--ease), box-shadow 0.25s var(--ease), background 0.25s;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: var(--bg-deep);
+      box-shadow: 0 4px 24px var(--accent-glow);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 36px var(--accent-glow);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 48px;
+      padding-bottom: 80px;
+    }
+
+    @media (min-width: 900px) {
+      .hero {
+        grid-template-columns: 1.05fr 0.95fr;
+        align-items: center;
+        gap: 64px;
+      }
+    }
+
+    .hero-copy h1 {
+      font-family: var(--font-display);
+      font-size: clamp(2.25rem, 5vw, 3.35rem);
+      font-weight: 700;
+      line-height: 1.12;
+      letter-spacing: -0.03em;
+      margin: 0 0 20px;
+      opacity: 0;
+      animation: rise 0.9s var(--ease) forwards;
+    }
+
+    .hero-copy h1 em {
+      font-style: italic;
+      color: var(--accent);
+      font-weight: 400;
+    }
+
+    .hero-lead {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      max-width: 38ch;
+      margin: 0 0 32px;
+      opacity: 0;
+      animation: rise 0.9s var(--ease) 0.1s forwards;
+    }
+
+    .hero-cta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      opacity: 0;
+      animation: rise 0.9s var(--ease) 0.2s forwards;
+    }
+
+    .trust-strip {
+      margin-top: 40px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px 28px;
+      align-items: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      opacity: 0;
+      animation: rise 0.9s var(--ease) 0.35s forwards;
+    }
+
+    .trust-strip strong {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .hero-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--line);
+      border-radius: calc(var(--radius) + 6px);
+      padding: 28px;
+      position: relative;
+      overflow: hidden;
+      opacity: 0;
+      animation: rise 1s var(--ease) 0.25s forwards;
+    }
+
+    .hero-card::after {
+      content: "";
+      position: absolute;
+      top: -50%;
+      right: -30%;
+      width: 60%;
+      height: 100%;
+      background: radial-gradient(circle, var(--accent-dim), transparent 70%);
+      pointer-events: none;
+    }
+
+    .card-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--accent);
+      margin-bottom: 16px;
+      font-weight: 600;
+    }
+
+    .metric-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .metric {
+      background: var(--bg-elevated);
+      border-radius: var(--radius);
+      padding: 16px;
+      border: 1px solid var(--line);
+    }
+
+    .metric b {
+      display: block;
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .metric span {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .thread-list {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin-bottom: 18px;
+    }
+
+    .thread {
+      display: block;
+      padding: 14px 0;
+      border-top: 1px solid var(--line);
+      text-decoration: none;
+      color: inherit;
+      transition: background 0.2s;
+      margin: 0 -8px;
+      padding-left: 8px;
+      padding-right: 8px;
+      border-radius: 10px;
+    }
+
+    .thread:first-of-type {
+      border-top: none;
+      padding-top: 0;
+    }
+
+    .thread:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .thread-title {
+      font-size: 0.9rem;
+      font-weight: 500;
+      margin: 0 0 6px;
+      line-height: 1.4;
+    }
+
+    .thread-meta {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 14px;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      background: var(--accent-dim);
+      color: var(--accent);
+    }
+
+    .tag-warn {
+      background: var(--warn-soft);
+      color: #ffc878;
+    }
+
+    .card-foot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      position: relative;
+      z-index: 1;
+    }
+
+    section {
+      padding: 72px 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .section-head {
+      max-width: 600px;
+      margin-bottom: 48px;
+    }
+
+    .section-head h2 {
+      font-family: var(--font-display);
+      font-size: clamp(1.75rem, 3vw, 2.25rem);
+      font-weight: 600;
+      margin: 0 0 12px;
+      letter-spacing: -0.02em;
+    }
+
+    .section-head p {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 1rem;
+    }
+
+    .features {
+      display: grid;
+      gap: 20px;
+    }
+
+    @media (min-width: 720px) {
+      .features {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .feature {
+      background: var(--bg-panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 28px;
+      transition: border-color 0.3s var(--ease), transform 0.3s var(--ease);
+    }
+
+    .feature:hover {
+      border-color: rgba(62, 224, 196, 0.35);
+      transform: translateY(-3px);
+    }
+
+    .feature-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: var(--accent-dim);
+      display: grid;
+      place-items: center;
+      margin-bottom: 18px;
+      font-size: 1.25rem;
+    }
+
+    .feature h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin: 0 0 10px;
+    }
+
+    .feature p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .boards {
+      display: grid;
+      gap: 16px;
+    }
+
+    @media (min-width: 640px) {
+      .boards {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (min-width: 960px) {
+      .boards {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .board {
+      background: var(--bg-panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 22px;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.25s var(--ease), transform 0.25s var(--ease);
+    }
+
+    .board:hover {
+      border-color: rgba(62, 224, 196, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .board h3 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin: 0 0 8px;
+    }
+
+    .board p {
+      margin: 0;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .board-stat {
+      margin-top: 14px;
+      font-size: 0.7rem;
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .events {
+      display: grid;
+      gap: 16px;
+    }
+
+    @media (min-width: 800px) {
+      .events {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .event {
+      background: var(--bg-panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 24px;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .event-date {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.35rem;
+      line-height: 1.1;
+      color: var(--accent);
+      text-align: center;
+      min-width: 52px;
+    }
+
+    .event-date small {
+      display: block;
+      font-family: var(--font-body);
+      font-size: 0.65rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: 4px;
+    }
+
+    .event h3 {
+      margin: 0 0 8px;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .event p {
+      margin: 0;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .cta-band {
+      margin-top: 24px;
+      padding: 48px 40px;
+      border-radius: calc(var(--radius) + 8px);
+      background: linear-gradient(135deg, var(--bg-elevated) 0%, var(--bg-panel) 100%);
+      border: 1px solid var(--line);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-band::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 0%, var(--accent-dim), transparent 55%);
+      pointer-events: none;
+    }
+
+    .cta-band h2 {
+      font-family: var(--font-display);
+      font-size: clamp(1.5rem, 2.5vw, 2rem);
+      margin: 0 0 12px;
+      position: relative;
+    }
+
+    .cta-band p {
+      color: var(--text-muted);
+      margin: 0 0 28px;
+      max-width: 520px;
+      margin-left: auto;
+      margin-right: auto;
+      position: relative;
+    }
+
+    .cta-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      position: relative;
+    }
+
+    footer {
+      padding: 48px 0 24px;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(18px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-layer" aria-hidden="true">
+    <div class="bg-grid"></div>
+    <div class="noise"></div>
+  </div>
+
+  <div class="wrap">
+    <header>
+      <a class="logo" href="#">
+        <div class="logo-mark">A</div>
+        <div class="logo-text">AI<span>-Med</span></div>
+      </a>
+      <nav aria-label="主导航">
+        <a href="#boards">版块</a>
+        <a href="#discuss">讨论</a>
+        <a href="#events">活动</a>
+        <a href="#cta">加入</a>
+      </nav>
+      <div class="header-actions">
+        <button type="button" class="btn btn-ghost" onclick="alert('演示：请接入登录页。')">登录</button>
+        <button type="button" class="btn btn-primary" onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">
+          加入社区
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <div class="hero">
+        <div class="hero-copy">
+          <h1>医学与 AI 的交叉路口，<br /><em>需要一群认真的人</em></h1>
+          <p class="hero-lead">
+            AI-Med 社区连接临床、科研、工程与合规同路人：分享落地踩坑、共读论文与指南、组织线上圆桌与黑客松。友善、专业、保持好奇心是我们的默认设置。
+          </p>
+          <div class="hero-cta">
+            <button type="button" class="btn btn-primary" onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">
+              领取新成员手册
+            </button>
+            <button type="button" class="btn btn-ghost" onclick="document.getElementById('boards').scrollIntoView({behavior:'smooth'})">
+              逛逛版块
+            </button>
+          </div>
+          <div class="trust-strip">
+            <span><strong>12.4k+</strong> 注册成员</span>
+            <span><strong>开源</strong> 项目与数据集索引</span>
+            <span><strong>行为准则</strong> 已公示</span>
+          </div>
+        </div>
+
+        <aside class="hero-card" aria-label="社区热帖预览">
+          <div class="card-label">此刻在聊什么</div>
+          <div class="metric-row">
+            <div class="metric">
+              <b>186</b>
+              <span>今日新帖</span>
+            </div>
+            <div class="metric">
+              <b>2.1k</b>
+              <span>在线</span>
+            </div>
+            <div class="metric">
+              <b>47</b>
+              <span>待回答问题</span>
+            </div>
+          </div>
+          <div class="thread-list">
+            <a class="thread" href="#discuss">
+              <p class="thread-title">院内部署 LLM：你们怎么做推理审计日志？</p>
+              <div class="thread-meta">
+                <span class="tag">工程实践</span>
+                <span>128 回复 · 42 分钟前</span>
+              </div>
+            </a>
+            <a class="thread" href="#discuss">
+              <p class="thread-title">多中心影像课题：脱敏清单求对照（附模板草案）</p>
+              <div class="thread-meta">
+                <span class="tag tag-warn">合规</span>
+                <span>56 回复 · 3 小时前</span>
+              </div>
+            </a>
+            <a class="thread" href="#discuss">
+              <p class="thread-title">「指南 RAG」评测集共建 · 第四周进度同步</p>
+              <div class="thread-meta">
+                <span class="tag">开源协作</span>
+                <span>89 回复 · 昨天</span>
+              </div>
+            </a>
+          </div>
+          <div class="card-foot">
+            <span>示例数据 · 接入论坛后替换为实时流</span>
+          </div>
+        </aside>
+      </div>
+
+      <section id="boards">
+        <div class="section-head">
+          <h2>按兴趣找到同频的人</h2>
+          <p>版块由志愿者与版主共同维护；发帖前请先阅读置顶规范与免责声明（社区讨论不构成医疗建议）。</p>
+        </div>
+        <div class="boards">
+          <a class="board" href="#discuss">
+            <h3>临床 × 模型</h3>
+            <p>真实世界场景、提示词与评测、与护理/药学协同流程。</p>
+            <div class="board-stat">3.2k 主题 / 周</div>
+          </a>
+          <a class="board" href="#discuss">
+            <h3>数据与隐私</h3>
+            <p>脱敏、最小必要原则、跨境与伦理审查经验交换。</p>
+            <div class="board-stat">置顶资源 24 篇</div>
+          </a>
+          <a class="board" href="#discuss">
+            <h3>论文共读</h3>
+            <p>医疗 NLP、CV、多模态与因果推断；每周导读笔记。</p>
+            <div class="board-stat">本期书目 · Med-Gemma 专题</div>
+          </a>
+          <a class="board" href="#discuss">
+            <h3>职业与招聘</h3>
+            <p>医院信息科、医疗 AI 产品与学术岗位；内推集中帖。</p>
+            <div class="board-stat">本周新帖 31</div>
+          </a>
+        </div>
+      </section>
+
+      <section id="discuss">
+        <div class="section-head">
+          <h2>在社区可以做什么</h2>
+          <p>从提问到共建：我们鼓励写清楚背景、贴引用、标注不确定性——好讨论会沉淀成可被搜索的知识。</p>
+        </div>
+        <div class="features">
+          <article class="feature">
+            <div class="feature-icon" aria-hidden="true">◎</div>
+            <h3>提问与答疑</h3>
+            <p>带上技术栈、法规语境与目标用户（医护 / 患者 / 管理），更容易获得可执行的回答。</p>
+          </article>
+          <article class="feature">
+            <div class="feature-icon" aria-hidden="true">◇</div>
+            <h3>周报与索引</h3>
+            <p>志愿者整理 arXiv / 顶会中与医疗 AI 相关的论文短评与开源发布。</p>
+          </article>
+          <article class="feature">
+            <div class="feature-icon" aria-hidden="true">▣</div>
+            <h3>项目找人</h3>
+            <p>标注「招募」标签：数据标注、临床顾问、合规与工程角色常有好匹配。</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="events">
+        <div class="section-head">
+          <h2>近期活动</h2>
+          <p>线上为主，不定期在北上广深成组织小型 meetup。日程以社区日历为准。</p>
+        </div>
+        <div class="events">
+          <article class="event">
+            <div class="event-date">22<small>四月</small></div>
+            <div>
+              <h3>线上圆桌：电子病历结构化与 FHIR 实践</h3>
+              <p>嘉宾来自三家三甲信息科 · Zoom · 北京时间 20:00 · 回放 7 天有效</p>
+            </div>
+          </article>
+          <article class="event">
+            <div class="event-date">26<small>四月</small></div>
+            <div>
+              <h3>黑客松：48 小时「急诊分诊辅助」命题</h3>
+              <p>提供合成数据集与基线模型；组队上限 5 人 · 提交需附伦理自检表</p>
+            </div>
+          </article>
+          <article class="event">
+            <div class="event-date">03<small>五月</small></div>
+            <div>
+              <h3>新成员 onboarding：版规、引用格式与匿名发帖</h3>
+              <p>适合刚入群的朋友 · 腾讯会议 · 含 Q&A</p>
+            </div>
+          </article>
+          <article class="event">
+            <div class="event-date">10<small>五月</small></div>
+            <div>
+              <h3>上海线下：医院 AI 治理小型沙龙（闭门）</h3>
+              <p>名额有限 · 需完成实名认证与 NDA · 报名链接见论坛置顶</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="cta">
+        <div class="cta-band">
+          <h2>加入 AI-Med 社区</h2>
+          <p>填写邮箱获取新成员手册与 Discord 邀请（演示页为占位）。也欢迎医院 / 实验室邮件洽谈合作曝光，但不接受软文洗稿。</p>
+          <div class="cta-actions">
+            <button type="button" class="btn btn-primary" onclick="alert('此为演示页：请替换为表单或 Discord/飞书邀请链接。')">
+              获取邀请
+            </button>
+            <a class="btn btn-ghost" href="mailto:community@ai-med.example" style="text-decoration: none">community@ai-med.example</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>© 2026 AI-Med 社区（演示页）· <a href="#">行为准则</a> · <a href="#">免责声明</a> · <a href="#">GitHub</a></p>
+    </footer>
+  </div>
+</body>
+</html>
