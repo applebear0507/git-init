@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI 课程 · AI-Med 社区</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Lexend:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-deep: #061210;
+      --bg-panel: #0c1a17;
+      --bg-elevated: #112320;
+      --text: #e8f4f0;
+      --text-muted: #8aa99e;
+      --accent: #3ee0c4;
+      --accent-dim: rgba(62, 224, 196, 0.15);
+      --accent-glow: rgba(62, 224, 196, 0.45);
+      --line: rgba(142, 169, 158, 0.18);
+      --warn-soft: rgba(255, 196, 120, 0.18);
+      --font-display: "Fraunces", Georgia, serif;
+      --font-body: "Lexend", system-ui, sans-serif;
+      --radius: 14px;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: var(--font-body);
+      font-weight: 400;
+      background: var(--bg-deep);
+      color: var(--text);
+      line-height: 1.65;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .bg-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .bg-layer::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background:
+        radial-gradient(ellipse 55% 45% at 15% 20%, rgba(62, 224, 196, 0.12), transparent 55%),
+        radial-gradient(ellipse 40% 35% at 85% 75%, rgba(30, 120, 100, 0.2), transparent 50%),
+        radial-gradient(circle at 50% 100%, rgba(8, 40, 35, 0.9), transparent 45%);
+    }
+
+    .bg-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--line) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(ellipse 80% 70% at 50% 30%, black 20%, transparent 75%);
+      opacity: 0.45;
+    }
+
+    .noise {
+      position: absolute;
+      inset: 0;
+      opacity: 0.04;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 24px 96px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 28px 0 48px;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .logo-mark {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: linear-gradient(145deg, var(--accent) 0%, #1a8a75 100%);
+      display: grid;
+      place-items: center;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--bg-deep);
+      box-shadow: 0 0 32px var(--accent-glow);
+    }
+
+    .logo-text {
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 1.35rem;
+      letter-spacing: -0.02em;
+    }
+
+    .logo-text span {
+      color: var(--accent);
+      font-weight: 400;
+    }
+
+    nav {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    nav a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      padding: 8px 14px;
+      border-radius: 999px;
+      transition: color 0.25s var(--ease), background 0.25s var(--ease);
+    }
+
+    nav a:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    nav a[aria-current="page"] {
+      color: var(--accent);
+      background: var(--accent-dim);
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 22px;
+      border-radius: 999px;
+      font-family: var(--font-body);
+      font-weight: 500;
+      font-size: 0.9rem;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s var(--ease), box-shadow 0.25s var(--ease), background 0.25s;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: var(--bg-deep);
+      box-shadow: 0 4px 24px var(--accent-glow);
+      text-decoration: none;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 36px var(--accent-glow);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--line);
+      text-decoration: none;
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .course-hero {
+      padding-bottom: 64px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .course-hero h1 {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4.5vw, 3rem);
+      font-weight: 700;
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+      margin: 0 0 16px;
+      opacity: 0;
+      animation: rise 0.9s var(--ease) forwards;
+    }
+
+    .course-hero h1 em {
+      font-style: italic;
+      color: var(--accent);
+      font-weight: 400;
+    }
+
+    .course-lead {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      max-width: 52ch;
+      margin: 0 0 28px;
+      opacity: 0;
+      animation: rise 0.9s var(--ease) 0.08s forwards;
+    }
+
+    .course-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 16px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 28px;
+      opacity: 0;
+      animation: rise 0.9s var(--ease) 0.15s forwards;
+    }
+
+    .course-meta span {
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: var(--bg-panel);
+    }
+
+    .course-cta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      opacity: 0;
+      animation: rise 0.9s var(--ease) 0.22s forwards;
+    }
+
+    section {
+      padding: 72px 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .section-head {
+      max-width: 640px;
+      margin-bottom: 40px;
+    }
+
+    .section-head h2 {
+      font-family: var(--font-display);
+      font-size: clamp(1.75rem, 3vw, 2.25rem);
+      font-weight: 600;
+      margin: 0 0 12px;
+      letter-spacing: -0.02em;
+    }
+
+    .section-head p {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 1rem;
+    }
+
+    .features {
+      display: grid;
+      gap: 20px;
+    }
+
+    @media (min-width: 720px) {
+      .features {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .feature {
+      background: var(--bg-panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 28px;
+      transition: border-color 0.3s var(--ease), transform 0.3s var(--ease);
+    }
+
+    .feature:hover {
+      border-color: rgba(62, 224, 196, 0.35);
+      transform: translateY(-3px);
+    }
+
+    .feature-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: var(--accent-dim);
+      display: grid;
+      place-items: center;
+      margin-bottom: 18px;
+      font-size: 1.25rem;
+    }
+
+    .feature h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin: 0 0 10px;
+    }
+
+    .feature p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .events {
+      display: grid;
+      gap: 16px;
+    }
+
+    @media (min-width: 800px) {
+      .events {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .event {
+      background: var(--bg-panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 24px;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .event-date {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.35rem;
+      line-height: 1.1;
+      color: var(--accent);
+      text-align: center;
+      min-width: 52px;
+    }
+
+    .event-date small {
+      display: block;
+      font-family: var(--font-body);
+      font-size: 0.65rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: 4px;
+    }
+
+    .event h3 {
+      margin: 0 0 8px;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .event p {
+      margin: 0;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .note-panel {
+      margin-top: 32px;
+      padding: 22px 24px;
+      border-radius: var(--radius);
+      background: var(--warn-soft);
+      border: 1px solid rgba(255, 196, 120, 0.25);
+      font-size: 0.9rem;
+      color: #e8dcc8;
+    }
+
+    .note-panel strong {
+      color: #ffc878;
+    }
+
+    .cta-band {
+      margin-top: 24px;
+      padding: 48px 40px;
+      border-radius: calc(var(--radius) + 8px);
+      background: linear-gradient(135deg, var(--bg-elevated) 0%, var(--bg-panel) 100%);
+      border: 1px solid var(--line);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-band::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 0%, var(--accent-dim), transparent 55%);
+      pointer-events: none;
+    }
+
+    .cta-band h2 {
+      font-family: var(--font-display);
+      font-size: clamp(1.5rem, 2.5vw, 2rem);
+      margin: 0 0 12px;
+      position: relative;
+    }
+
+    .cta-band p {
+      color: var(--text-muted);
+      margin: 0 0 28px;
+      max-width: 520px;
+      margin-left: auto;
+      margin-right: auto;
+      position: relative;
+    }
+
+    .cta-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      position: relative;
+    }
+
+    footer {
+      padding: 48px 0 24px;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(18px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-layer" aria-hidden="true">
+    <div class="bg-grid"></div>
+    <div class="noise"></div>
+  </div>
+
+  <div class="wrap">
+    <header>
+      <a class="logo" href="index.html">
+        <div class="logo-mark">A</div>
+        <div class="logo-text">AI<span>-Med</span></div>
+      </a>
+      <nav aria-label="主导航">
+        <a href="index.html#boards">版块</a>
+        <a href="index.html#discuss">讨论</a>
+        <a href="index.html#events">活动</a>
+        <a href="course.html" aria-current="page">AI 课程</a>
+        <a href="index.html#cta">加入</a>
+      </nav>
+      <div class="header-actions">
+        <a class="btn btn-ghost" href="index.html">返回首页</a>
+        <a class="btn btn-primary" href="index.html#cta">加入社区</a>
+      </div>
+    </header>
+
+    <main>
+      <div class="course-hero">
+        <h1>医学场景下的 <em>人工智能</em> 入门课</h1>
+        <p class="course-lead">
+          面向临床、科研与医学信息背景的同学：用同一套语言讨论数据、模型、验证与落地边界。强调直觉、可复现流程与伦理意识，不替代院校正式学分课，可作为自学与共读的路线图。
+        </p>
+        <div class="course-meta" role="list">
+          <span role="listitem">约 8 周 · 每周 2～3 小时</span>
+          <span role="listitem">录播 + 直播答疑</span>
+          <span role="listitem">Python 基础建议自备</span>
+        </div>
+        <div class="course-cta-row">
+          <a class="btn btn-primary" href="mailto:jiawangping@tmmu.edu.cn?subject=AI%E8%AF%BE%E7%A8%8B%E5%92%A8%E8%AF%A2">邮件咨询报名</a>
+          <a class="btn btn-ghost" href="#syllabus">查看大纲</a>
+        </div>
+      </div>
+
+      <section id="audience" aria-labelledby="audience-heading">
+        <div class="section-head">
+          <h2 id="audience-heading">适合谁</h2>
+          <p>零基础友好，但若已接触过电子病历、统计或任一编程语言，会更容易把练习做对。</p>
+        </div>
+        <div class="features">
+          <article class="feature">
+            <div class="feature-icon" aria-hidden="true">🩺</div>
+            <h3>临床与护理同道</h3>
+            <p>想把「论文里的 AI」翻译成可讨论的临床问题：适应症、偏倚、人机协同与患者沟通。</p>
+          </article>
+          <article class="feature">
+            <div class="feature-icon" aria-hidden="true">🔬</div>
+            <h3>科研与公卫</h3>
+            <p>需要设计可审查的实验：数据划分、外部验证、报告规范与可重复脚本。</p>
+          </article>
+          <article class="feature">
+            <div class="feature-icon" aria-hidden="true">⚙️</div>
+            <h3>工程与信息科</h3>
+            <p>希望理解医学语料与合规约束，把模型部署进真实工作流而不是「离线 demo」。</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="syllabus" aria-labelledby="syllabus-heading">
+        <div class="section-head">
+          <h2 id="syllabus-heading">课程大纲</h2>
+          <p>每周主题固定，具体案例与阅读材料随学期微调；直播时间开课前在邮件与社区日历公布。</p>
+        </div>
+        <div class="events">
+          <article class="event">
+            <div class="event-date">01<small>周</small></div>
+            <div>
+              <h3>医学 AI 地图</h3>
+              <p>任务类型（分类、生成、检索）、数据形态、监管与文献检索入门。</p>
+            </div>
+          </article>
+          <article class="event">
+            <div class="event-date">02<small>周</small></div>
+            <div>
+              <h3>数据与标签</h3>
+              <p>脱敏、标注协议、抽样偏差；用表格数据完成一次基线模型。</p>
+            </div>
+          </article>
+          <article class="event">
+            <div class="event-date">03<small>周</small></div>
+            <div>
+              <h3>监督学习精读</h3>
+              <p>训练 / 验证 / 测试、交叉验证、校准与误差分析。</p>
+            </div>
+          </article>
+          <article class="event">
+            <div class="event-date">04<small>周</small></div>
+            <div>
+              <h3>影像与序列简介</h3>
+              <p>CNN 直觉、3D 与多模态提要；不展开全部架构细节。</p>
+            </div>
+          </article>
+          <article class="event">
+            <div class="event-date">05<small>周</small></div>
+            <div>
+              <h3>NLP 与临床文本</h3>
+              <p>实体识别、事件抽取、匿名化；大语言模型能力边界讨论。</p>
+            </div>
+          </article>
+          <article class="event">
+            <div class="event-date">06<small>周</small></div>
+            <div>
+              <h3>检索与知识增强</h3>
+              <p>RAG 流程、指南引用、幻觉缓解策略与评测思路。</p>
+            </div>
+          </article>
+          <article class="event">
+            <div class="event-date">07<small>周</small></div>
+            <div>
+              <h3>部署与治理</h3>
+              <p>MLOps 最小集、监控、回滚；院内伦理与患者告知要点。</p>
+            </div>
+          </article>
+          <article class="event">
+            <div class="event-date">08<small>周</small></div>
+            <div>
+              <h3>期末项目路演</h3>
+              <p>自选小课题：问题定义、方法、局限与后续工作；互评与讲师反馈。</p>
+            </div>
+          </article>
+        </div>
+        <p class="note-panel">
+          <strong>说明：</strong>本页为课程介绍示意。开课时间、费用、证书与作业平台以正式通知为准；不构成医疗建议或招生承诺。
+        </p>
+      </section>
+
+      <section id="join-course" aria-labelledby="join-course-heading">
+        <div class="cta-band">
+          <h2 id="join-course-heading">想先旁听或组队</h2>
+          <p>欢迎发邮件说明背景与期望收获；也可从社区首页加入讨论，在「活动」区关注共读与研讨会。</p>
+          <div class="cta-actions">
+            <a class="btn btn-primary" href="mailto:jiawangping@tmmu.edu.cn?subject=AI%E8%AF%BE%E7%A8%8B%E5%92%A8%E8%AF%A2">jiawangping@tmmu.edu.cn</a>
+            <a class="btn btn-ghost" href="index.html">回到 AI-Med 首页</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>© 2026 AI-Med 社区（演示页）</p>
+    </footer>
+  </div>
+</body>
+</html>
